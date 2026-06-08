@@ -751,36 +751,88 @@ function obterHTMLFormatadoParaHistorico() {
     let corVerde = "#2ecc71";
     let corVermelha = "#e74c3c";
 
+    if (pontos[id1].isCompostaHistorico) {
+        // Se já era uma composta vinda do histórico, reaproveita o rótulo original dela
+        return pontos[id1].rotuloOriginal;
+    }
+
     let mapa = { AND: "∧", OR: "∨", IF: "→", IFF: "↔", XOR: "⊻" };
     
+    // 1. Se houver apenas 1 ponto clicado no diagrama
     if (ordemCliques.length === 1) {
-        let valorPuro = getValorLogicoFatia(pontos[id1].f);
-        if (negarGeral) valorPuro = !valorPuro;
+        // Caso A: Existe um conectivo selecionado (Ex: p ∧ p, p ∨ ¬p)
+        if (conectivoSelecionado) {
+            let valores = obterValoresUnarios(id1, pontos[id1].f);
+            let rFinal = calcularOperacao(valores.valorA, valores.valorB, operacao);
+            if (negarGeral) rFinal = !rFinal;
+
+            let corEstrutura = rFinal ? corVerde : corVermelha;
+            let corA = valores.valorA ? corVerde : corVermelha;
+            let corB = valores.valorB ? corVerde : corVermelha;
+
+            let pStr = id1.toLowerCase();
+            // Determina se o segundo termo é negado pelo modoNegacaoManual (ex: ¬p)
+            let qStr = modoNegacaoManual ? (id1.startsWith("¬") ? id1.replace("¬", "").toLowerCase() : "¬" + pStr) : pStr;
+
+            let pSpan = `<span style="color:${corA}">${pStr}</span>`;
+            let qSpan = `<span style="color:${corB}">${qStr}</span>`;
+            let opSpan = `<span style="color:${corEstrutura}"> ${mapa[operacao]} </span>`;
+            
+            let htmlFormado = `<span style="color:${corEstrutura}">(</span>${pSpan}${opSpan}${qSpan}<span style="color:${corEstrutura}">)</span>`;
+            
+            if (negarGeral) {
+                htmlFormado = `<span style="color:${corEstrutura}">¬</span>${htmlFormado}`;
+            }
+            return htmlFormado;
+        } 
         
-        let corComponente = valorPuro ? corVerde : corVermelha;
-        let ex = id1.toLowerCase();
-        
-        if (negarGeral) {
-            return `<span style="color:${corComponente}">¬${ex}</span>`;
+        // Caso B: Proposição simples pura (sem conectivo ativo)
+        else {
+            let valorPuro = getValorLogicoFatia(pontos[id1].f);
+            if (id1.startsWith("¬")) valorPuro = !valorPuro;
+            if (negarGeral) valorPuro = !valorPuro;
+            
+            let corComponente = valorPuro ? corVerde : corVermelha;
+            let ex = id1.toLowerCase();
+            
+            if (negarGeral) {
+                return `<span style="color:${corComponente}">¬${ex}</span>`;
+            }
+            return `<span style="color:${corComponente}">${ex}</span>`;
         }
-        return `<span style="color:${corComponente}">${ex}</span>`;
+    }
+
+    // 2. Se forem dois pontos distintos operando entre si (ordemCliques.length === 2)
+    let id2 = ordemCliques[1];
+    
+    let pVal = getValorLogicoFatia(pontos[id1].f);
+    if (id1.startsWith("¬")) pVal = !pVal;
+    
+    let qVal = getValorLogicoFatia(pontos[id2].f);
+    if (id2.startsWith("¬")) qVal = !qVal;
+    
+    let rFinal = calcularOperacao(pVal, qVal, operacao);
+    if (negarGeral) rFinal = !rFinal;
+
+    // 3. Define as cores seguindo estritamente a regra do sistema
+    let corEstrutura = rFinal ? corVerde : corVermelha; 
+    let corP = pVal ? corVerde : corVermelha;          
+    let corQ = qVal ? corVerde : corVermelha;
+
+    let pStr = id1.toLowerCase();
+    let qStr = id2.toLowerCase();
+
+    let pSpan = `<span style="color:${corP}">${pStr}</span>`;
+    let qSpan = `<span style="color:${corQ}">${qStr}</span>`;
+    let opSpan = `<span style="color:${corEstrutura}"> ${mapa[operacao]} </span>`;
+    
+    let htmlFormado = `<span style="color:${corEstrutura}">(</span>${pSpan}${opSpan}${qSpan}<span style="color:${corEstrutura}">)</span>`;
+    
+    if (negarGeral) {
+        htmlFormado = `<span style="color:${corEstrutura}">¬</span>${htmlFormado}`;
     }
     
-    let id2 = ordemCliques[1];
-    let pVal = getValorLogicoFatia(pontos[id1].f);
-    let qVal = getValorLogicoFatia(pontos[id2].f);
-    let r = calcularOperacao(pVal, qVal, operacao);
-    if(negarGeral) r = !r;
-    
-    let corOp = r ? corVerde : corVermelha;
-    let corP = pVal ? corVerde : corVermelha;
-    let corQ = qVal ? corVerde : corVermelha;
-    let opSimbolo = mapa[operacao] || " ";
-    
-    let baseHTML = `(<span style="color:${corP}">${id1.toLowerCase()}</span> ${opSimbolo} <span style="color:${corQ}">${id2.toLowerCase()}</span>)`;
-    if(negarGeral) baseHTML = `¬` + baseHTML;
-    
-    return `<span style="color:${corOp}">${baseHTML}</span>`;
+    return htmlFormado;
 }
 
 function configurarEventosHistorico() {
