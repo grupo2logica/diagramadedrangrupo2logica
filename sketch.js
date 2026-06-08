@@ -62,6 +62,11 @@ const CAMADA_CENTRAL = 1;
 
 let tooltipExpressao;
 
+let touchXStart = 0;
+let touchYStart = 0;
+let arrastandoTelaMovel = false;
+const limiteSensibilidadeArrasto = 10;
+
 
 
 function setup(){
@@ -1512,42 +1517,48 @@ function mouseMoved(){
 
 } 
 
-function touchMoved(){
-
-    if(touches.length > 0){
-
-        previewMouseX = touches[0].x;
-
-        previewMouseY = touches[0].y;
-
+function touchMoved() {
+    if (touches.length > 0) {
+        let deslocamentoX = abs(touches[0].x - touchXStart);
+        let deslocamentoY = abs(touches[0].y - touchYStart);
+        
+        // Se o dedo moveu mais do que o limite, o usuário quer rolar a tela
+        if (deslocamentoY > limiteSensibilidadeArrasto || deslocamentoX > limiteSensibilidadeArrasto) {
+            arrastandoTelaMovel = true;
+        }
     }
+    return true;
+}
 
     return false;
 
 }
 
+function touchEnded() {
+    // Só dispara a interação lógica do diagrama se NÃO foi um movimento de rolagem
+    if (!arrastandoTelaMovel && touchXStart >= 0 && touchXStart <= width && touchYStart >= 0 && touchYStart <= height) {
+        handleInteracao(touchXStart, touchYStart);
+    }
+    return true;
+}
 
-
-function mousePressed(){
-
-    handleInteracao(mouseX, mouseY);
-
-    return false;
-
+function mousePressed() {
+    // No computador, detecta se o clique foi com o mouse tradicional (ignora toques mobile simulados aqui)
+    if (touches.length === 0 && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+        handleInteracao(mouseX, mouseY);
+    }
 }
 
 
 
-function touchStarted(){
-
-    if(touches.length > 0){
-
-        handleInteracao(touches[0].x, touches[0].y);
-
+function touchStarted() {
+    if (touches.length > 0) {
+        touchXStart = touches[0].x;
+        touchYStart = touches[0].y;
+        arrastandoTelaMovel = false;
     }
-
-    return false;
-
+    // Retornar true PERMITE que a rolagem vertical nativa aconteça
+    return true; 
 }
 
 
