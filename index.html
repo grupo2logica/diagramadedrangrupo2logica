@@ -57,11 +57,13 @@
             align-items:center;
             position:relative;
             margin: 0 auto;
+            /* Garante que o container permita o gesto de rolagem vertical */
+            touch-action: pan-y;
         }
 
         #canvas-container canvas {
-            /* Permite rolagem na vertical mesmo se o usuário arrastar o dedo por cima do canvas */
-            touch-action: pan-y;
+            /* FORÇA a rolagem na vertical quando o usuário arrastar o dedo por cima do canvas */
+            touch-action: pan-y !important;
             max-width: 100% !important;
             height: auto !important;
         }
@@ -347,7 +349,7 @@
             <div class="btn-group" id="botoes-entradas">
                 <button id="btnP" class="active" onclick="setEntrada('P')">P</button>
                 <button id="btnQ" onclick="setEntrada('Q')">Q</button>
-                <button id="btn¬" onclick="ativarModoNegacao()">¬</button>
+                <button id="btn¬" onclick="inverterEstadoSlotAtivo()">¬</button>
             </div>
 
             <div class="conectivos-grid">
@@ -378,10 +380,10 @@
             <div class="learn-box">
                 <div class="learn-title">Clique para aprender</div>
                 <div class="learn-grid">
-                    <button class="learn-item" onclick="mostrarInfo('Proposições Simples','Uma proposição simples é uma afirmação que possui apenas dois valores lógicos possíveis:\n\nVerdadeiro (V)\nou\nFalso (F).\n\nNo Diagrama de Dran, P e Q representam as proposições simples fundamentais.\n\nCada proposição ocupa uma posição estrutural dentro do diagrama.\n\nOs quadrantes possuem valores lógicos fixos:\n\nQ1 = Verdadeiro\nQ2 = Falso\nQ3 = Verdadeiro\nQ4 = Falso.')">Proposições simples</button>
+                    <button class="learn-item" onclick="mostrarInfo('Proposições Simples','Uma proposição simples é uma afirmação que possui apenas dois valores lógicos possíveis:\n\nVerdadeiro (V)\nou\nFalso (F).\n\nNo Diagrama de Dran, P e Q representam as coposições simples fundamentais.\n\nCada proposição ocupa uma posição estrutural dentro do diagrama.\n\nOs quadrantes possuem valores lógicos fixos:\n\nQ1 = Verdadeiro\nQ2 = Falso\nQ3 = Verdadeiro\nQ4 = Falso.')">Proposições simples</button>
                     <button class="learn-item" onclick="mostrarInfo('Conectivos Lógicos','∧  Conjunção (E)\nV apenas quando ambas forem verdadeiras.\n\n∨  Disjunção (OU)\nF apenas quando ambas forem falsas.\n\n→  Condicional\nF apenas quando V → F.\n\n↔  Bicondicional\nV quando ambas possuem o mesmo valor lógico.\n\n⊻  Disjunção Exclusiva\nV quando apenas uma é verdadeira.')">Conectivos</button>
                     <button class="learn-item" onclick="mostrarInfo('Negações','NEGAR PROPOSIÇÕES SIMPLES:\n\n¬(P) ⇔ ¬P\n\nA negação inverte o valor lógico da proposição.\n\n\nLEI DE MORGAN:\n\n¬(P ∧ Q) ⇔ (¬P ∨ ¬Q)\n\n¬(P ∨ Q) ⇔ (¬P ∧ ¬Q)\n\n\nNEGAÇÃO DA CONDICIONAL:\n\n¬(P → Q) ⇔ (P ∧ ¬Q)\n\n\nNEGAÇÃO DA BICONDICIONAL:\n\n¬(P ↔ Q) ⇔ (P ⊻ Q)\n\n\nNEGAÇÃO DA DISJUNÇÃO EXCLUSIVA:\n\n¬(P ⊻ Q) ⇔ (P ↔ Q)\n\n\nO botão ¬ altera a negação manual.\n\nO botão ¬(Expressão Completa) aplica automaticamente equivalências estruturais.')">Negações</button>
-                    <button class="learn-item" onclick="mostrarInfo('Camadas do Diagrama','As camadas representam níveis estruturais no diagrama. Nelas surgem os trajetos responsáveis por demonstrar as variáveis da proposição situada no diagrama. A camada central é reservada para organization estrutural e não pode iniciar proposições.')">Camadas</button>
+                    <button class="learn-item" onclick="mostrarInfo('Camadas do Diagrama','As camadas representam níveis estruturais no diagrama. Nelas surgem os trajetos responsáveis por demonstrar as variáveis da proposição situada no diagrama. A camada central é reservada para organização estrutural e não pode iniciar proposições.')">Camadas</button>
                     <button class="learn-item" onclick="mostrarInfo('Botões de Limpeza','Limpar Diagrama:\n\nRemove todas as proposições do diagrama atual.\n\n\nLimpar Histórico:\n\nRemove todas as expressões registradas.')">Botões de limpeza</button>
                     <button class="learn-item" onclick="mostrarInfo('Registro de Expressões','Registrar Expressão salva a expressão lógica atual no histórico.\n\nArmazene e avalie seus resultados instantaneamente na listagem.')">Registro de expressões</button>
                 </div>
@@ -401,7 +403,7 @@
             document.getElementById('info-box').style.display = 'none';
         }
 
-        // SCRIPT COMPLEMENTAR DE TOUCH CORRIGIDO: Monitora o arrastar para não anular a rolagem da tela
+        // SCRIPT COMPLEMENTAR DE TOUCH: Evita comportamento fantasma e respeita a rolagem pan-y nativa
         document.addEventListener("DOMContentLoaded", function() {
             const mapearBotoesMovel = () => {
                 const botoes = document.querySelectorAll("button, .log-item");
@@ -418,17 +420,15 @@
                         }, { passive: true });
 
                         botao.addEventListener("touchmove", function(e) {
-                            // Se mover o dedo verticalmente mais que 6px, assume que o usuário quer rolar a tela
                             if (Math.abs(e.touches[0].clientY - yInicial) > 6) {
                                 arrastandoParaRolar = true;
                             }
                         }, { passive: true });
 
                         botao.addEventListener("touchend", function(e) {
-                            // Só executa a ação se não foi um gesto de rolagem de tela
                             if (!arrastandoParaRolar) {
                                 if (botao.onclick) {
-                                    e.preventDefault(); // Impede double tap/click duplo fantasma
+                                    e.preventDefault();
                                     botao.onclick();
                                 } else {
                                     botao.click();
@@ -441,7 +441,6 @@
 
             mapearBotoesMovel();
 
-            // Monitora dinamicamente a inclusão de itens no Histórico para aplicar o touch corrigido neles também
             const observadorLog = new MutationObserver(() => {
                 mapearBotoesMovel();
             });
