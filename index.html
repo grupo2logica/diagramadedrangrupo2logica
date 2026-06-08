@@ -20,6 +20,9 @@
             background:#000;
             margin:0;
             padding:0;
+            /* Melhora o comportamento de rolagem e deslize no celular */
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
 
         body{
@@ -57,7 +60,8 @@
         }
 
         #canvas-container canvas {
-            touch-action: none;
+            /* Permite rolagem na vertical mesmo se o usuário arrastar o dedo por cima do canvas */
+            touch-action: pan-y;
             max-width: 100% !important;
             height: auto !important;
         }
@@ -94,6 +98,9 @@
             transition:.2s;
             padding:14px 8px; 
             font-size:15px;
+            /* Impede seleção acidental de texto ao tocar repetidamente no mobile */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         button:hover{
@@ -174,6 +181,7 @@
             border-radius:10px;
             padding:10px;
             font-size:13px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .log-item{
@@ -185,6 +193,7 @@
             cursor:pointer;
             border-radius:6px;
             transition: background 0.2s;
+            -webkit-user-select: none;
         }
 
         .log-item:hover{
@@ -251,7 +260,6 @@
             background:none;
         }
 
-        /* Caixa corrigida com rolagem interna e "X" fixo para Mobile */
         #info-box{
             display:none;
             position:fixed;
@@ -268,6 +276,7 @@
             padding:24px 20px 20px 20px;
             z-index:9999;
             box-shadow:0 0 40px rgba(0,0,0,1);
+            -webkit-overflow-scrolling: touch;
         }
 
         #info-title{
@@ -371,7 +380,7 @@
                 <div class="learn-grid">
                     <button class="learn-item" onclick="mostrarInfo('Proposições Simples','Uma proposição simples é uma afirmação que possui apenas dois valores lógicos possíveis:\n\nVerdadeiro (V)\nou\nFalso (F).\n\nNo Diagrama de Dran, P e Q representam as proposições simples fundamentais.\n\nCada proposição ocupa uma posição estrutural dentro do diagrama.\n\nOs quadrantes possuem valores lógicos fixos:\n\nQ1 = Verdadeiro\nQ2 = Falso\nQ3 = Verdadeiro\nQ4 = Falso.')">Proposições simples</button>
                     <button class="learn-item" onclick="mostrarInfo('Conectivos Lógicos','∧  Conjunção (E)\nV apenas quando ambas forem verdadeiras.\n\n∨  Disjunção (OU)\nF apenas quando ambas forem falsas.\n\n→  Condicional\nF apenas quando V → F.\n\n↔  Bicondicional\nV quando ambas possuem o mesmo valor lógico.\n\n⊻  Disjunção Exclusiva\nV quando apenas uma é verdadeira.')">Conectivos</button>
-                    <button class="learn-item" onclick="mostrarInfo('Negações','NEGAR PROPOSIÇÕES SIMPLES:\n\n¬(P) ⇔ ¬P\n\nA negação inverte o valor lógico da proposição.\n\n\nLEI DE MORGAN:\n\n¬(P ∧ Q) ⇔ (¬P ∨ ¬Q)\n\n¬(P ∨ Q) ⇔ (¬P ∧ ¬Q)\n\n\nNEGAÇÃO DA CONDICIONAL:\n\n¬(P → Q) ⇔ (P ∧ ¬Q)\n\n\nNEGAÇÃO DA BICONDICIONAL:\n\n¬(P ↔ Q) ⇔ (P ⊻ Q)\n\n\nNEGAÇÃO DA DISJUNÇÃO EXCLUSIVA:\n\n¬(P ⊻ Q) ⇔ (P ↔ Q)\n\n\nO botão ¬ ativa a negação manual.\n\nO botão ¬(Expressão Completa) aplica automaticamente equivalências estruturais.')">Negações</button>
+                    <button class="learn-item" onclick="mostrarInfo('Negações','NEGAR PROPOSIÇÕES SIMPLES:\n\n¬(P) ⇔ ¬P\n\nA negação inverte o valor lógico da proposição.\n\n\nLEI DE MORGAN:\n\n¬(P ∧ Q) ⇔ (¬P ∨ ¬Q)\n\n¬(P ∨ Q) ⇔ (¬P ∧ ¬Q)\n\n\nNEGAÇÃO DA CONDICIONAL:\n\n¬(P → Q) ⇔ (P ∧ ¬Q)\n\n\nNEGAÇÃO DA BICONDICIONAL:\n\n¬(P ↔ Q) ⇔ (P ⊻ Q)\n\n\nNEGAÇÃO DA DISJUNÇÃO EXCLUSIVA:\n\n¬(P ⊻ Q) ⇔ (P ↔ Q)\n\n\nO botão ¬ altera a negação manual.\n\nO botão ¬(Expressão Completa) aplica automaticamente equivalências estruturais.')">Negações</button>
                     <button class="learn-item" onclick="mostrarInfo('Camadas do Diagrama','As camadas representam níveis estruturais no diagrama. Nelas surgem os trajetos responsáveis por demonstrar as variáveis da proposição situada no diagrama. A camada central é reservada para organização estrutural e não pode iniciar proposições.')">Camadas</button>
                     <button class="learn-item" onclick="mostrarInfo('Botões de Limpeza','Limpar Diagrama:\n\nRemove todas as proposições do diagrama atual.\n\n\nLimpar Histórico:\n\nRemove todas as expressões registradas.')">Botões de limpeza</button>
                     <button class="learn-item" onclick="mostrarInfo('Registro de Expressões','Registrar Expressão salva a expressão lógica atual no histórico.\n\nArmazene e avalie seus resultados instantaneamente na listagem.')">Registro de expressões</button>
@@ -386,11 +395,43 @@
             document.getElementById('info-title').innerText = titulo;
             document.getElementById('info-text').innerText = texto;
             document.getElementById('info-box').style.display = 'block';
-            document.getElementById('info-box').scrollTop = 0; // Reseta a rolagem para o topo sempre que abrir
+            document.getElementById('info-box').scrollTop = 0; 
         }
         function fecharInfo(){
             document.getElementById('info-box').style.display = 'none';
         }
+
+        // SCRIPT COMPLEMENTAR DE TOUCH: Vincula toques instantâneos nos botões sem quebrar cliques de desktop
+        document.addEventListener("DOMContentLoaded", function() {
+            const mapearBotoesMovel = () => {
+                const botoes = document.querySelectorAll("button, .log-item");
+                botoes.forEach(botao => {
+                    if (!botao.dataset.touchMapeado) {
+                        botao.dataset.touchMapeado = "true";
+                        botao.addEventListener("touchstart", function(e) {
+                            // Executa imediatamente o clique nativo ou inline sem os 300ms de delay móvel
+                            if (botao.onclick) {
+                                e.preventDefault(); // Evita o disparo duplo (touchstart + click)
+                                botao.onclick();
+                            } else {
+                                botao.click();
+                            }
+                        }, { passive: false });
+                    }
+                });
+            };
+
+            mapearBotoesMovel();
+
+            // Monitora dinamicamente a inclusão de itens no Histórico para aplicar o touch instantâneo neles também
+            const observadorLog = new MutationObserver(() => {
+                mapearBotoesMovel();
+            });
+            const logArea = document.getElementById("log-area");
+            if (logArea) {
+                observadorLog.observe(logArea, { childList: true });
+            }
+        });
     </script>
 </body>
 </html>
