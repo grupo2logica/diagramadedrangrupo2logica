@@ -62,10 +62,6 @@ const CAMADA_CENTRAL = 1;
 
 let tooltipExpressao;
 
-let touchXStart = 0;
-let touchYStart = 0;
-let arrastandoTelaMovel = false;
-const limiteSensibilidadeArrasto = 10;
 
 
 
@@ -1542,25 +1538,37 @@ function touchEnded() {
     return true;
 }
 
-function mousePressed() {
-    // No computador, detecta se o clique foi com o mouse tradicional (ignora toques mobile simulados aqui)
-    if (touches.length === 0 && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-        handleInteracao(mouseX, mouseY);
+} function mousePressed(){
+
+
+
+    handleInteracao(mouseX, mouseY);
+
+
+
+    return false;
+
+
+
+} 
+
+
+
+
+
+function touchStarted(){
+
+
+
+    if(touches.length > 0){
+
+
+
+        handleInteracao(touches[0].x, touches[0].y);
+
+
+
     }
-}
-
-
-
-function touchStarted() {
-    if (touches.length > 0) {
-        touchXStart = touches[0].x;
-        touchYStart = touches[0].y;
-        arrastandoTelaMovel = false;
-    }
-    // Retornar true PERMITE que a rolagem vertical nativa aconteça
-    return true; 
-}
-
 
 
 function handleInteracao(xIn, yIn){
