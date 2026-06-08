@@ -101,6 +101,8 @@
             /* Impede seleção acidental de texto ao tocar repetidamente no mobile */
             user-select: none;
             -webkit-user-select: none;
+            /* Remove o delay do clique móvel nativamente sem bloquear a rolagem vertical */
+            touch-action: manipulation;
         }
 
         button:hover{
@@ -182,6 +184,8 @@
             padding:10px;
             font-size:13px;
             -webkit-overflow-scrolling: touch;
+            /* Permite interações rápidas e rolagem livre */
+            touch-action: manipulation;
         }
 
         .log-item{
@@ -194,6 +198,7 @@
             border-radius:6px;
             transition: background 0.2s;
             -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         .log-item:hover{
@@ -401,53 +406,9 @@
             document.getElementById('info-box').style.display = 'none';
         }
 
-        // SCRIPT COMPLEMENTAR DE TOUCH CORRIGIDO: Não bloqueia a rolagem vertical nativa ao arrastar o dedo
+        // O navegador agora cuida nativamente dos cliques sem atraso e permite rolar a tela deslizando o dedo em qualquer área!
         document.addEventListener("DOMContentLoaded", function() {
-            const mapearBotoesMovel = () => {
-                const botoes = document.querySelectorAll("button, .log-item");
-                botoes.forEach(botao => {
-                    if (!botao.dataset.touchMapeado) {
-                        botao.dataset.touchMapeado = "true";
-                        
-                        let yInicial = 0;
-                        let arrastandoParaRolar = false;
-
-                        botao.addEventListener("touchstart", function(e) {
-                            yInicial = e.touches[0].clientY;
-                            arrastandoParaRolar = false;
-                        }, { passive: true });
-
-                        botao.addEventListener("touchmove", function(e) {
-                            // Se o dedo se mover verticalmente mais do que 6 pixels, o sistema entende como comando de rolagem da página
-                            if (Math.abs(e.touches[0].clientY - yInicial) > 6) {
-                                arrastandoParaRolar = true;
-                            }
-                        }, { passive: true });
-
-                        botao.addEventListener("touchend", function(e) {
-                            // Só ativa o clique se o usuário deu um toque rápido e limpo, sem arrastar a tela junto
-                            if (!arrastandoParaRolar) {
-                                if (botao.onclick) {
-                                    e.preventDefault(); 
-                                    botao.onclick();
-                                } else {
-                                    botao.click();
-                                }
-                            }
-                        }, { passive: false });
-                    }
-                });
-            };
-
-            mapearBotoesMovel();
-
-            const observadorLog = new MutationObserver(() => {
-                mapearBotoesMovel();
-            });
-            const logArea = document.getElementById("log-area");
-            if (logArea) {
-                observadorLog.observe(logArea, { childList: true });
-            }
+            // Mantido o escopo e estruturas caso queira adicionar hooks futuros, sem lógica agressiva de bloqueio de toque.
         });
     </script>
 </body>
