@@ -13,10 +13,17 @@
             -webkit-tap-highlight-color:transparent;
         }
 
-        body{
-            margin:0;
-            padding:10px;
+        html, body {
+            width: 100%;
+            overflow-x: hidden; 
+            overflow-y: auto;   
             background:#000;
+            margin:0;
+            padding:0;
+        }
+
+        body{
+            padding:10px;
             color:white;
             font-family:'Segoe UI',sans-serif;
             display:flex;
@@ -35,35 +42,44 @@
             background:#111;
             border:1px solid #2a2a2a;
             border-radius:18px;
-            padding:18px;
+            padding:15px;
             box-shadow:0 0 30px rgba(0,0,0,.8);
         }
 
         #canvas-container{
-            flex:1 1 600px;
+            flex:1 1 500px;
+            max-width: 100%;
             display:flex;
             justify-content:center;
             align-items:center;
-            min-height:600px;
             position:relative;
+            margin: 0 auto;
+        }
+
+        #canvas-container canvas {
+            touch-action: none;
+            max-width: 100% !important;
+            height: auto !important;
         }
 
         .canvas-title{
             position:absolute;
-            top:14px;
+            top:10px;
             left:50%;
             transform:translateX(-50%);
             z-index:20;
             pointer-events:none;
-            font-size:28px;
+            font-size:22px;
             font-weight:bold;
             color:#fff;
             text-shadow:0 0 10px rgba(0,0,0,.9);
+            white-space: nowrap;
         }
 
         #controls{
             flex:1 1 340px;
             max-width:360px;
+            width: 100%;
             display:flex;
             flex-direction:column;
         }
@@ -76,8 +92,8 @@
             font-weight:bold;
             cursor:pointer;
             transition:.2s;
-            padding:12px 8px;
-            font-size:14px;
+            padding:14px 8px; 
+            font-size:15px;
         }
 
         button:hover{
@@ -90,7 +106,6 @@
             color:#000;
         }
 
-        /* Reconfigurado dinamicamente para 3 colunas (P, Q e ¬) */
         .btn-group{
             display:grid;
             grid-template-columns:repeat(3,1fr);
@@ -109,6 +124,7 @@
             grid-column:span 5;
             background:#391414;
             color:#ff8e8e;
+            font-size: 13px;
         }
 
         #btnNegTudo.active{
@@ -143,11 +159,15 @@
             line-height:1.5;
             font-weight:bold;
             font-size:15px;
+            text-align: center;
+            word-wrap: break-word;   
+            overflow-wrap: break-word;
+            white-space: normal;     
         }
 
         #log-area{
             margin-top:10px;
-            height:220px;
+            height:200px;
             overflow-y:auto;
             background:#050505;
             border:1px solid #222;
@@ -231,6 +251,7 @@
             background:none;
         }
 
+        /* Caixa corrigida com rolagem interna e "X" fixo para Mobile */
         #info-box{
             display:none;
             position:fixed;
@@ -238,20 +259,23 @@
             left:50%;
             transform:translate(-50%,-50%);
             width:360px;
-            max-width:90%;
+            max-width:92%;
+            max-height:85vh;        
+            overflow-y:auto;        
             background:#161616;
-            border:1px solid #555;
+            border:2px solid #555;
             border-radius:14px;
-            padding:20px;
+            padding:24px 20px 20px 20px;
             z-index:9999;
             box-shadow:0 0 40px rgba(0,0,0,1);
         }
 
         #info-title{
             display:block;
-            margin-bottom:10px;
+            margin-bottom:12px;
             font-size:18px;
             color:white;
+            padding-right:25px;    
         }
 
         #info-text{
@@ -262,26 +286,36 @@
         }
 
         .close-info{
-            position:absolute;
-            top:8px;
-            right:12px;
+            position:sticky;       
+            float: right;
+            top: 0;
+            right: 0;
             cursor:pointer;
-            font-size:22px;
+            font-size:28px;        
             color:#ff7675;
+            line-height:1;
+            padding: 5px 10px;     
+            margin-top: -10px;
+            margin-right: -5px;
         }
 
         @media(max-width:850px){
             .container{
                 flex-direction:column;
+                align-items: center;
+                padding: 10px;
             }
             #controls{
                 max-width:100%;
             }
             #canvas-container{
-                min-height:auto;
+                width: 100%;
+                min-height: auto;
+                margin-bottom: 10px;
             }
             .canvas-title{
-                font-size:22px;
+                font-size:20px;
+                top: 8px;
             }
         }
     </style>
@@ -338,7 +372,7 @@
                     <button class="learn-item" onclick="mostrarInfo('Proposições Simples','Uma proposição simples é uma afirmação que possui apenas dois valores lógicos possíveis:\n\nVerdadeiro (V)\nou\nFalso (F).\n\nNo Diagrama de Dran, P e Q representam as proposições simples fundamentais.\n\nCada proposição ocupa uma posição estrutural dentro do diagrama.\n\nOs quadrantes possuem valores lógicos fixos:\n\nQ1 = Verdadeiro\nQ2 = Falso\nQ3 = Verdadeiro\nQ4 = Falso.')">Proposições simples</button>
                     <button class="learn-item" onclick="mostrarInfo('Conectivos Lógicos','∧  Conjunção (E)\nV apenas quando ambas forem verdadeiras.\n\n∨  Disjunção (OU)\nF apenas quando ambas forem falsas.\n\n→  Condicional\nF apenas quando V → F.\n\n↔  Bicondicional\nV quando ambas possuem o mesmo valor lógico.\n\n⊻  Disjunção Exclusiva\nV quando apenas uma é verdadeira.')">Conectivos</button>
                     <button class="learn-item" onclick="mostrarInfo('Negações','NEGAR PROPOSIÇÕES SIMPLES:\n\n¬(P) ⇔ ¬P\n\nA negação inverte o valor lógico da proposição.\n\n\nLEI DE MORGAN:\n\n¬(P ∧ Q) ⇔ (¬P ∨ ¬Q)\n\n¬(P ∨ Q) ⇔ (¬P ∧ ¬Q)\n\n\nNEGAÇÃO DA CONDICIONAL:\n\n¬(P → Q) ⇔ (P ∧ ¬Q)\n\n\nNEGAÇÃO DA BICONDICIONAL:\n\n¬(P ↔ Q) ⇔ (P ⊻ Q)\n\n\nNEGAÇÃO DA DISJUNÇÃO EXCLUSIVA:\n\n¬(P ⊻ Q) ⇔ (P ↔ Q)\n\n\nO botão ¬ ativa a negação manual.\n\nO botão ¬(Expressão Completa) aplica automaticamente equivalências estruturais.')">Negações</button>
-                    <button class="learn-item" onclick="mostrarInfo('Camadas do Diagrama','As camadas representam níveis estruturais do diagrama.\n\nA primeira proposição fixa sua posição lógica em uma camada.\n\nA segunda proposição percorre dinamicamente as fatias.\n\nQuando existe espaço interno disponível, o sistema cria automaticamente uma camada inferior invertida para representar todas as combinações possíveis:\n\nVV\nVF\nFV\nFF.\n\nA camada central é reservada para organização estrutural e não pode iniciar proposições.')">Camadas</button>
+                    <button class="learn-item" onclick="mostrarInfo('Camadas do Diagrama','As camadas representam níveis estruturais no diagrama. Nelas surgem os trajetos responsáveis por demonstrar as variáveis da proposição situada no diagrama. A camada central é reservada para organização estrutural e não pode iniciar proposições.')">Camadas</button>
                     <button class="learn-item" onclick="mostrarInfo('Botões de Limpeza','Limpar Diagrama:\n\nRemove todas as proposições do diagrama atual.\n\n\nLimpar Histórico:\n\nRemove todas as expressões registradas.')">Botões de limpeza</button>
                     <button class="learn-item" onclick="mostrarInfo('Registro de Expressões','Registrar Expressão salva a expressão lógica atual no histórico.\n\nArmazene e avalie seus resultados instantaneamente na listagem.')">Registro de expressões</button>
                 </div>
@@ -352,6 +386,7 @@
             document.getElementById('info-title').innerText = titulo;
             document.getElementById('info-text').innerText = texto;
             document.getElementById('info-box').style.display = 'block';
+            document.getElementById('info-box').scrollTop = 0; // Reseta a rolagem para o topo sempre que abrir
         }
         function fecharInfo(){
             document.getElementById('info-box').style.display = 'none';
